@@ -20,19 +20,32 @@ public:
 };
 
 // Special derived Classes
-class SavingsAccount : public BankAccount{
+class SavingsAccount : public BankAccount
+{
 public:
     SavingsAccount(int Acc_Num, double Initial_Balance);
-    // -- add interest calculation functions here --
+    void Calculate_Interest();
+
+private:
+    double Interest_Rate;
 };
 
-class CheckingAccount : public BankAccount{
-    public:
+class CheckingAccount : public BankAccount
+{
+public:
     CheckingAccount(int Acc_Num, double Initial_Balance);
 };
 
-class FixedDepositAccount : public BankAccount{
-    public:
+class FixedDepositAccount : public BankAccount
+{
+public:
     FixedDepositAccount(int Acc_Num, double Initial_Balance);
-    // Add Maturity date handiling 
+    // Add Maturity date handiling
 };
+
+// Functions to 1. Read 2. Write to csv files
+// Function to withdraw money
+// Function to Log Transactions with details like date, time, type, amount etc
+// Use operator overloading to transfer money between accounts
+// Friend function to secure money transfer between two accounts (kinda extra)
+// Display menu function 
