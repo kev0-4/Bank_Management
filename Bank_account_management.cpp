@@ -25,3 +25,14 @@ public:
     SavingsAccount(int Acc_Num, double Initial_Balance);
     // -- add interest calculation functions here --
 };
+
+class CheckingAccount : public BankAccount{
+    public:
+    CheckingAccount(int Acc_Num, double Initial_Balance);
+};
+
+class FixedDepositAccount : public BankAccount{
+    public:
+    FixedDepositAccount(int Acc_Num, double Initial_Balance);
+    // Add Maturity date handiling 
+};
