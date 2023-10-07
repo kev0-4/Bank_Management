@@ -5,26 +5,61 @@ using namespace std;
 class BankAccount
 {
 protected:
-    int Account_Number;
-    string Account_Type;
-    double Account_Balance;
-    vector<string> Transaction_History;
+    int account_number;
+    string account_type;
+    double account_balance;
+    vector<string> transaction_history;
 
 public:
-    BankAccount(int Acc_Num, const string &Acc_Type, double Initial_Balance);
+    BankAccount(int acc_num, const string &acc_type, double initial_balance);
 
-    virtual void Deposit(double Amount);
-    virtual bool Withdraw(double Amount);
-    virtual void Display() const;
-    double Get_Balance() const;
+    virtual void Deposit(double amount)
+    {
+        if (amount > 0)
+        {
+            account_balance += amount;
+            transaction_history.push_back("Deposit: " + to_string(amount));
+        }
+    }
+    virtual bool Withdraw(double amount)
+    {
+        if (account_balance >= amount && amount > 0)
+        {
+            account_balance -= amount;
+            transaction_history.push_back("Withdrawal: " + to_string(amount));
+            return true;
+        }
+        return false; // Transaction fails if insufficient funds or invalid amount
+    }
+    virtual void Display() const
+    {
+        cout << "Account Number: " << account_number << endl;
+        cout << "Account type: " << account_type << endl;
+        cout << "Transaction History: " << endl;
+        for (const auto &transaction : transaction_history)
+            cout << "-" << transaction << endl;
+    }
+    double Get_Balance() const
+    {
+        return account_balance;
+    }
+    friend ostream &operator<<(ostream &os, const BankAccount &account)
+    {
+        os << "Account NUmber: " << account.account_number << endl;
+        os << "Account Type: " << account.account_type << endl;
+        os << "Balance: " << account.account_balance << endl;
+    }
 };
 
 // Special derived Classes
 class SavingsAccount : public BankAccount
 {
 public:
-    SavingsAccount(int Acc_Num, double Initial_Balance);
-    void Calculate_Interest();
+    SavingsAccount(int acc_num, double initial_balance) : BankAccount(acc_num, "Savings", initial_balance), Interest_Rate(Interest_Rate) {}
+    void Calculate_Interest()
+    {
+        // Time_t now = time(nullptr); //implement a structure for time
+    }
 
 private:
     double Interest_Rate;
@@ -33,13 +68,13 @@ private:
 class CheckingAccount : public BankAccount
 {
 public:
-    CheckingAccount(int Acc_Num, double Initial_Balance);
+    CheckingAccount(int acc_num, double initial_balance);
 };
 
 class FixedDepositAccount : public BankAccount
 {
 public:
-    FixedDepositAccount(int Acc_Num, double Initial_Balance);
+    FixedDepositAccount(int acc_num, double initial_balance);
     // Add Maturity date handiling
 };
 
@@ -48,4 +83,4 @@ public:
 // Function to Log Transactions with details like date, time, type, amount etc
 // Use operator overloading to transfer money between accounts
 // Friend function to secure money transfer between two accounts (kinda extra)
-// Display menu function 
+// Display menu function
