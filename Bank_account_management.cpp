@@ -1,3 +1,9 @@
+/*
+#include <vector>     // For managing collections of accounts
+#include <fstream>    // For reading and writing to a CSV file
+#include <ctime>      // For handling date and time
+*/
+
 #include <bits/stdc++.h>
 using namespace std;
 
@@ -11,7 +17,7 @@ protected:
     vector<string> transaction_history;
 
 public:
-    BankAccount(int acc_num, const string &acc_type, double initial_balance);
+    BankAccount(int acc_num, const string &acc_type, double initial_balance); // Constructor
 
     virtual void Deposit(double amount)
     {
@@ -45,6 +51,9 @@ public:
     }
     friend ostream &operator<<(ostream &os, const BankAccount &account)
     {
+        // os represents output
+        // when cout << account is called
+        // it will print all 3 parameters making it convinent
         os << "Account NUmber: " << account.account_number << endl;
         os << "Account Type: " << account.account_type << endl;
         os << "Balance: " << account.account_balance << endl;
