@@ -64,14 +64,43 @@ public:
 class SavingsAccount : public BankAccount
 {
 public:
-    SavingsAccount(int acc_num, double initial_balance) : BankAccount(acc_num, "Savings", initial_balance), Interest_Rate(Interest_Rate) {}
+    /*
+    Member Variables
+    acc_num,acc_type,acc_balance
+    transaction_history - vector of string that log all transaction made
+    interest_rate
+    */
+    SavingsAccount(int acc_num, double initial_balance, double interest_rate) : BankAccount(acc_num, "Savings", initial_balance), interest_rate(interest_rate) {}
+
     void Calculate_Interest()
     {
-        // Time_t now = time(nullptr); //implement a structure for time
+        /*
+        Function checks initial balance and interesr rate and then calculates interest earned
+        over specific period of time
+        Then interest is added to account's balance
+        this record is logged to transaction history with date and time
+        time_t tm* are inbuilt dt to store time data , similar to python date and time
+        time_t represents time as int
+        tm* is time structure
+        */
+
+        time_t now = time(nullptr);      // get curr time in seconds
+        tm *localTime = localtime(&now); // converts time_t to a structure with date and time
+        int days_in_month = 30;          // assumption for simplicity
+        double monthly_interest = (account_balance * interest_rate * days_in_month) / 36000;
+
+        account_balance += monthly_interest;
+
+        // logging in transaction history
+        char timestamp[20];
+        // strftime - string format time to 'more' human redable string
+        strftime(timestamp, sizeof(timestamp), "%Y-%m-%d %H:%M:%S", localTime);
+        string transaction_details = std::string(timestamp) + " - Interest credited: $" + std::to_string(monthly_interest);
+        logTransaction(transaction_details); // to be implemented
     }
 
 private:
-    double Interest_Rate;
+    double interest_rate;
 };
 
 class CheckingAccount : public BankAccount
