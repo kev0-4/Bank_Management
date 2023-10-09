@@ -58,6 +58,23 @@ public:
         os << "Account Type: " << account.account_type << endl;
         os << "Balance: " << account.account_balance << endl;
     }
+    void record_transaction(const string& type, double amount){
+        /*
+        this record is logged to transaction history with date and time
+        time_t tm* are inbuilt dt to store time data , similar to python date and time
+        time_t represents time as int
+        tm* is time structure
+        */
+        time_t now = time(nullptr);      // get curr time in seconds
+        tm *localTime = localtime(&now); // converts time_t to a structure with date and time
+        int days_in_month = 30;          // assumption for simplicity
+        // logging in transaction history
+        char timestamp[40];
+        // strftime - string format time to 'more' human redable string
+        strftime(timestamp, sizeof(timestamp),"%Y-%m-%d %H:%M:%S", localTime);
+        string transaction_details = "[" + std::string(timestamp) + "] " + type + ": $" + std::to_string(amount);
+        transaction_history.push_back(transaction_details);
+    }
 };
 
 // Special derived Classes
@@ -78,25 +95,10 @@ public:
         Function checks initial balance and interesr rate and then calculates interest earned
         over specific period of time
         Then interest is added to account's balance
-        this record is logged to transaction history with date and time
-        time_t tm* are inbuilt dt to store time data , similar to python date and time
-        time_t represents time as int
-        tm* is time structure
         */
-
-        time_t now = time(nullptr);      // get curr time in seconds
-        tm *localTime = localtime(&now); // converts time_t to a structure with date and time
-        int days_in_month = 30;          // assumption for simplicity
-        double monthly_interest = (account_balance * interest_rate * days_in_month) / 36000;
-
-        account_balance += monthly_interest;
-
-        // logging in transaction history
-        char timestamp[20];
-        // strftime - string format time to 'more' human redable string
-        strftime(timestamp, sizeof(timestamp), "%Y-%m-%d %H:%M:%S", localTime);
-        string transaction_details = std::string(timestamp) + " - Interest credited: $" + std::to_string(monthly_interest);
-        logTransaction(transaction_details); // to be implemented
+        double interest = (account_balance * interest_rate) / 100.0;
+        account_balance += interest;
+        record_transaction("Interest Credited", interest);
     }
 
 private:
