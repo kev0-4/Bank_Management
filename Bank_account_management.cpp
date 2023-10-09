@@ -1,10 +1,9 @@
-/*
-#include <vector>     // For managing collections of accounts
-#include <fstream>    // For reading and writing to a CSV file
-#include <ctime>      // For handling date and time
-*/
+#include <vector>  // For managing collections of accounts
+#include <fstream> // For reading and writing to a CSV file
+#include <ctime>   // For handling date and time
 
-#include <bits/stdc++.h>
+#include <bits/stdc++.h> // Without other libraries it is givng error
+
 using namespace std;
 
 // Class Serves as base level for all account types
@@ -17,7 +16,8 @@ protected:
     vector<string> transaction_history;
 
 public:
-    BankAccount(int acc_num, const string &acc_type, double initial_balance); // Constructor
+    BankAccount(int acc_num, const string &acc_type, double initial_balance)
+        : account_number(acc_num), account_type(acc_type), account_balance(initial_balance) {} // Constructor
 
     virtual void Deposit(double amount)
     {
@@ -57,6 +57,28 @@ public:
     {
         return account_type;
     }
+    virtual string GetAdditionalData() const
+    {
+        return ""; // Default implementation returns an empty string
+    }
+
+    bool TransferMoney(BankAccount &source, BankAccount &destination, double amount)
+    {
+        if (source.Withdraw(amount))
+        {
+            destination.Deposit(amount);
+            cout << "Money transferred successfully." << endl;
+            return true;
+        }
+        else
+        {
+            cout << "Money transfer failed. Insufficient funds in the source account." << endl;
+            return false;
+        }
+    }
+
+    virtual void Calculate_Interest() {}
+
     friend ostream &operator<<(ostream &os, const BankAccount &account)
     {
         // os represents output
@@ -112,6 +134,10 @@ public:
         account_balance += interest;
         record_transaction("Interest Credited", interest);
     }
+    string GetAdditionalData() const override
+    {
+        return to_string(interest_rate); // Additional data for SavingsAccount
+    }
 };
 
 class FixedDepositAccount : public BankAccount
@@ -152,6 +178,10 @@ public:
              << "-" << maturity_date.tm_mon + 1 << "-"
              << maturity_date.tm_mday << std::endl;
     }
+    string GetAdditionalData() const override
+    {
+        return to_string(maturity_date.tm_year + 1900) + "-" + to_string(maturity_date.tm_mon + 1) + "-" + to_string(maturity_date.tm_mday);
+    }
 };
 
 class CheckingAccount : public BankAccount
@@ -161,15 +191,24 @@ public:
         : BankAccount(acc_num, "Checking", initial_balance) {}
 };
 
-void writeAccountsToCSV(vector<BankAccount> &accounts)
+void writeAccountsToCSV(const vector<BankAccount> &accounts)
 {
     ofstream file("accounts.csv");
     if (!file.is_open())
         return;
+
     for (const BankAccount &account : accounts)
     {
-        file << account.Get_Balance() << "," << account.Get_account_number() << "," << account.Get_account_type() << "\n";
+        file << fixed << setprecision(2);
+        file << account.Get_account_number() << "," << account.Get_Balance() << "," << account.Get_account_type();
+
+        string additionalData = account.GetAdditionalData();
+        if (!additionalData.empty())
+            file << "," << additionalData;
+
+        file << "\n";
     }
+
     file.close();
 }
 
@@ -194,10 +233,11 @@ void readAccountsFromCSV(vector<BankAccount> &accounts)
                 // reading interest rate from csv;
                 accounts.push_back(SavingsAccount(account_number, account_balance, interest_rate));
             }
-            //     else if (accountType == "Checking") {
-            //         accounts.push_back(CheckingAccount(accountNumber, balance));
-            //      }
-            else if (account_type == "Fixe Deposit")
+            else if (account_type == "Checking")
+            {
+                accounts.push_back(CheckingAccount(account_number, account_balance));
+            }
+            else if (account_type == "Fixed Deposit")
             {
                 int year, month, day;
                 iss >> year >> month >> day;
@@ -213,6 +253,161 @@ void readAccountsFromCSV(vector<BankAccount> &accounts)
     file.close();
 }
 
-// Use operator overloading to transfer money between accounts
-// Friend function to secure money transfer between two accounts (kinda extra)
-// Display menu function
+int main()
+{
+
+    vector<BankAccount> accounts;
+
+    // Read account data from CSV file
+    readAccountsFromCSV(accounts);
+
+    int choice;
+    while (true)
+    {
+        cout << "Bank Account Management System" << endl;
+        cout << "1. Create Account" << endl;
+        cout << "2. Deposit" << endl;
+        cout << "3. Withdraw" << endl;
+        cout << "4. Display Account Info" << endl;
+        cout << "5. Calculate Interest (Savings Account)" << endl;
+        cout << "6. Exit" << endl;
+        cout << "Enter your choice: ";
+        cin >> choice;
+
+        switch (choice)
+        {
+        case 1:
+        {
+            int accountNumber;
+            string accountType;
+            double initialBalance;
+            cout << "Enter account number: ";
+            cin >> accountNumber;
+            cout << "Enter account type (Savings, Checking, Fixed_Deposit, etc.): ";
+            // scanf(" %[^\n]s",accountType);
+            cin >> accountType;
+            cout << "Enter initial balance: ";
+            cin >> initialBalance;
+
+            if (accountType == "Savings")
+            {
+                double interestRate;
+                cout << "Enter interest rate: ";
+                cin >> interestRate;
+                accounts.push_back(SavingsAccount(accountNumber, initialBalance, interestRate));
+            }
+            else if (accountType == "Checking")
+            {
+                accounts.push_back(CheckingAccount(accountNumber, initialBalance));
+            }
+            else if (accountType == "Fixed_Deposit")
+            {
+                int year, month, day;
+                cout << "Enter maturity year: ";
+                cin >> year;
+                cout << "Enter maturity month: ";
+                cin >> month;
+                cout << "Enter maturity day: ";
+                cin >> day;
+
+                tm maturityDate = {0};
+                maturityDate.tm_year = year - 1900;
+                maturityDate.tm_mon = month - 1;
+                maturityDate.tm_mday = day;
+
+                accounts.push_back(FixedDepositAccount(accountNumber, initialBalance, maturityDate));
+            }
+            else
+            {
+                cout << "Invalid account type. Please try again." << endl;
+            }
+
+            writeAccountsToCSV(accounts);
+            break;
+        }
+
+        case 2:
+        {
+            int accountNumber;
+            double amount;
+            cout << "Enter account number: ";
+            cin >> accountNumber;
+            cout << "Enter deposit amount: ";
+            cin >> amount;
+
+            for (BankAccount &account : accounts)
+            {
+                if (accountNumber == account.Get_account_number())
+                {
+                    account.Deposit(amount);
+                    writeAccountsToCSV(accounts);
+                    break;
+                }
+            }
+            break;
+        }
+        case 3:
+        {
+            int accountNumber;
+            double amount;
+            cout << "Enter account number: ";
+            cin >> accountNumber;
+            cout << "Enter Withdrawal amount: ";
+            cin >> amount;
+
+            for (BankAccount &account : accounts)
+            {
+                if (accountNumber == account.Get_account_number())
+                {
+                    if (account.Withdraw(amount))
+                    {
+                        cout << "Withdrawal successful." << endl;
+                        writeAccountsToCSV(accounts);
+                    }
+                    else
+                    {
+                        cout << "Insufficient funds." << endl;
+                    }
+                    break;
+                }
+            }
+            break;
+        }
+        case 4:
+        {
+            int accountNumber;
+            cout << "Enter account number: ";
+            cin >> accountNumber;
+
+            for (const BankAccount &account : accounts)
+            {
+                if (accountNumber == account.Get_account_number())
+                {
+                    account.Display();
+                    break;
+                }
+            }
+            break;
+        }
+        case 5:
+        {
+            // Calculate interest for all savings accounts
+            for (BankAccount &account : accounts)
+            {
+                account.Calculate_Interest();
+                writeAccountsToCSV(accounts);
+            }
+            break;
+        }
+        case 6:
+        {
+            // Exit the program
+            return 0;
+        }
+        default:
+            cout << "Invalid choice. Please try again." << endl;
+        }
+    }
+
+    return 0;
+}
