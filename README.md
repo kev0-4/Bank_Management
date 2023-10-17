@@ -18,9 +18,9 @@ Ensure that your development environment includes these libraries.
 
 # ***Getting Started***
 
-Download or clone the repository to your local machine.
-Open the C++ source code in your preferred development environment.
-Ensure that the required libraries are available in your environment (as mentioned in the #include statements).
+Download or clone the repository to your local machine.<br>
+Open the C++ source code in your preferred development environment.<br>
+Ensure that the required libraries are available in your environment (as mentioned in the #include statements).<br>
 Compile and run the program.
 
 # ***Usage***
